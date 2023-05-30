@@ -1,0 +1,135 @@
+---
+title: "Muestras de café de Coffee Quality Institute (CQI)"
+author: "Kevin Córdoba"
+date: '2023-05-29'
+format:
+  html:
+    theme: united
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Introducción 
+El Coffee Quality Institute (CQI) es una organización sin fines de lucro con sede en California, Estados Unidos, que se dedica a mejorar la calidad y el valor del café a nivel mundial. Desde su fundación en 1996, el CQI ha trabajado incansablemente para promover estándares de calidad en la industria del café a través de investigaciones, programas de capacitación y certificación. El CQI colabora estrechamente con productores, procesadores, tostadores y otros actores de la cadena de suministro del café para mejorar la calidad del café, fomentar la sostenibilidad y apoyar el crecimiento de la industria del café de especialidad.
+
+Como parte de su labor, el CQI mantiene una valiosa base de datos en línea que proporciona información y recursos a profesionales y entusiastas del café interesados en aprender sobre la calidad y la sostenibilidad del café. Esta base de datos abarca temas como la producción de café, el procesamiento y la evaluación sensorial, y también ofrece datos sobre genética del café, tipos de suelo y otros factores que influyen en la calidad del café. En cuanto a la evaluación de la calidad del café, el CQI utiliza una serie de criterios sensoriales para evaluar y puntuar el café. Estos criterios incluyen el aroma, el sabor, el regusto, la acidez, el cuerpo, el equilibrio, la uniformidad, la limpieza de taza y la dulzura. Estas evaluaciones permiten identificar los perfiles sensoriales de los distintos cafés y garantizar una experiencia de consumo de alta calidad.
+
+El CQI también se dedica a estudiar y abordar los defectos que pueden afectar el café. Estos defectos se clasifican en dos categorías: defectos de categoría uno, que son detectables visualmente, y defectos de categoría dos, que solo se pueden percibir mediante la degustación. Al comprender y abordar estos defectos, el CQI contribuye a mejorar la calidad general del café y a eliminar características indeseables en los granos.
+
+### Carga de Datos y Paquetes 
+```{r, message=FALSE}
+# Carga de paquetes de R 
+library(dplyr)
+library(ggplot2) 
+library(plotly) 
+library(DT) 
+library(sf) 
+library(terra) 
+library(raster) 
+library(leaflet) 
+library(tidyverse)
+library(readr)
+```
+
+```{r carga-paquetes, message=FALSE}
+#Carga de datos
+coffee_datos <-
+  readr::read_csv("https://raw.githubusercontent.com/gf0604-procesamientodatosgeograficos/2023-i/main/datos/cqi/coffee-quality.csv",
+    col_select = c(
+      "Country_of_Origin",
+      "Variety",
+      "Color",
+      "Altitude",
+      "Total_Cup_Points"
+    )
+  )
+```
+
+### Tabla de Datos 
+```{r, message=FALSE}
+coffee_datos %>%
+  dplyr::select(Country_of_Origin, Variety, Color, Altitude, Total_Cup_Points) %>%
+  datatable(
+    colnames = c("Country_of_Origin", "Variety", "Color", "Altitude", "Total_Cup_Points"),
+    options = list(
+      pageLength = 5,
+      language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
+    )
+  )
+
+```
+
+## Gráficos estadísticos 
+
+### Histograma
+
+```{r}
+coffee_datos %>%
+  ggplot(aes(x = Total_Cup_Points)) +
+  geom_density(
+    color = "steelblue",
+    fill = "lightblue",
+    alpha = 0.5,
+    size = 1
+  ) +
+  labs(
+    title = "Distribución de Puntaje Total",
+    x = "Puntaje Total",
+    y = "Densidad"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10),
+    axis.ticks = element_blank()
+  )
+
+```
+
+### Gráfico de dispersión
+
+```{r}
+coffee_datos %>%
+  ggplot(aes(x = Altitude, y = Total_Cup_Points)) +
+  geom_point(size = 2) +
+  geom_smooth(method = "lm", se = FALSE) +
+  ggtitle("Altitude vs Total Cup Points") +
+  xlab("Altitude") +
+  ylab("Total Cup Points") +
+  labs(color = "Especie", shape = "Especie")
+```
+
+### Gráfico de caja
+```{r}
+coffee_datos %>%
+  ggplot(aes(x = Color, y = Total_Cup_Points, fill = Color)) +
+  geom_boxplot(
+    color = "darkblue",
+    fill = "lightblue",
+    outlier.color = "red",
+    outlier.shape = 16,
+    outlier.size = 2,
+    width = 0.7
+  ) +
+  labs(
+    title = "Distribución de Total Cup Points por Color",
+    x = "Color",
+    y = "Total Cup Points"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    plot.title = element_text(size = 16, face = "bold"),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10),
+    axis.ticks = element_blank()
+  )
+
+```
+
+### Bibliografía
+Coffee Quality Institute provides coffee education throughout the coffee value chain. (2023). Coffeeinstitute.org. https://www.coffeeinstitute.org/
